@@ -24,7 +24,7 @@ int main(void){
         }
     }
 
-    // Calculation to be parallelized.
+    // Calculation
     for(int i = 1; i < row; i++){
         for(int j = 0; j < col; j++){
             float tmp = 2.0 * a[i-1][j];

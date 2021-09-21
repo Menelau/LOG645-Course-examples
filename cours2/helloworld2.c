@@ -32,8 +32,8 @@ int main(int argc, char* argv[]) {
          // MPI_Recv(greeting, message_size, MPI_CHAR, p,
          //    MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-        // MPI_Recv(greeting, message_size, MPI_CHAR, MPI_ANY_SOURCE,
-        //     MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(greeting, message_size, MPI_CHAR, MPI_ANY_SOURCE,
+            MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
          printf("%s\n", greeting);
       } 

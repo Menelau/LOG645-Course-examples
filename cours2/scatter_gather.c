@@ -46,9 +46,9 @@ int main(int argc, char **argv){
             finalbuf[0], finalbuf[1], finalbuf[2], finalbuf[3]);
     }
 
-    // int final_sum;
-    // MPI_Allreduce(&local_value, &final_sum, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    // printf("Rank: %d, Final sum: %d\n", rank, final_sum);
+    int final_sum;
+    MPI_Reduce(&local_value, &final_sum, 1, MPI_INT, MPI_SUM, 0,MPI_COMM_WORLD);
+    printf("Rank: %d, Final sum: %d\n", rank, final_sum);
     MPI_Finalize();
     return 0;
 }

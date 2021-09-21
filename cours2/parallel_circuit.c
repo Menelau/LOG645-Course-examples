@@ -1,5 +1,5 @@
 /*
- *   Circuit Satisfiability, Version 3
+ * Circuit Satisfiability MPI version.
  *
  * This Program determines whether a circuit is
  * satisfiable, that is, whether there is a combination of
@@ -11,25 +11,24 @@
  *   by Michael J. Quinn (2003)
  */
 
-#include "mpi.h"
+#include <mpi.h>
 #include <stdio.h>
 
 /* Return 1 if 'i'th bit of 'n' is 1; 0 otherwise */
 #define EXTRACT_BIT(n,i) ((n&(1<<i))?1:0)
 
 int main (int argc, char *argv[]) {
-   int count = 0;            /* Solutions found by this proc */
-   double elapsed_time;  /* Time to find, count solutions */
-   int global_count;     /* Total number of solutions */
-   int id;               /* Process rank */
-   int p;                /* Number of processes */
+   int count = 0;
+   double elapsed_time;
+   int global_count;
+   int id;
+   int p;
    int check_circuit (int, int);
 
-   // Initialize MPI
    MPI_Init (&argc, &argv);
-
-   /* Start timer. Makes sure all processes are at this point (barrier) */
+   // Makes sure all processes are at this point before starting timer.
    MPI_Barrier (MPI_COMM_WORLD);
+
    elapsed_time = - MPI_Wtime();
 
    MPI_Comm_rank (MPI_COMM_WORLD, &id);
@@ -39,11 +38,11 @@ int main (int argc, char *argv[]) {
       count += check_circuit (id, i);
    }
 
-   // Get the global sum. result is writen to process 0.
+   // Reduce to get global sum. Only process 0 will have this result.
    MPI_Reduce (&count, &global_count, 1, MPI_INT, MPI_SUM, 0,
       MPI_COMM_WORLD); 
 
-   /* Stop timer */
+   // Get total time
    elapsed_time += MPI_Wtime();
 
    // Using ID 0 for printing
@@ -54,12 +53,12 @@ int main (int argc, char *argv[]) {
    MPI_Finalize();
    if (id == 0) printf ("There are %d different solutions\n",
       global_count);
+
    return 0;
 }
 
-/* Each element is a bit of z */
 int check_circuit (int id, int number) {
-   int v[16];        /* Each element is a bit of z */
+   int v[16];        /* Each element is a bit of number */
    int i;
 
    for (int i = 0; i < 16; i++){

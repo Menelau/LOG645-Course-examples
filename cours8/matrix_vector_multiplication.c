@@ -102,8 +102,10 @@ int main(int argc, char* argv[]) {
    return 0;
 }
 
+//----------------------Support Functions--------------------------
 
-/*------------------------------------------------------------------
+
+/*
  * Function:    Print_matrix
  * Purpose:     Print the matrix
  * In args:     title, A, m, n
@@ -120,7 +122,7 @@ void Print_matrix( char* title, double A[], int m, int n) {
 }
 
 
-/*------------------------------------------------------------------
+/*
  * Function:    Print_vector
  * Purpose:     Print a vector
  * In args:     title, y, m
@@ -135,7 +137,7 @@ void Print_vector(char* title, double y[], double m) {
 }
 
 
-/*------------------------------------------------------------------
+/*
  * Function:    Read_matrix
  * Purpose:     Read in the matrix
  * In args:     prompt, m, n
@@ -151,7 +153,7 @@ void Read_matrix(char* prompt, double A[], int m, int n) {
 }
 
 
-/*------------------------------------------------------------------
+/*
  * Function:        Read_vector
  * Purpose:         Read in the vector x
  * In arg:          prompt, n
@@ -166,7 +168,7 @@ void Read_vector(char* prompt, double x[], int n) {
 }
 
 
-/*------------------------------------------------------------------
+/*
  * Function:  Usage
  * Purpose:   print a message showing what the command line should
  *            be, and terminate

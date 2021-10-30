@@ -3,16 +3,20 @@
  * is distributed by block rows.  Vectors are distributed by
  * blocks.
  *
- * Input:
- *     m, n: order of matrix
- *     A, x: the matrix and the vector to be multiplied
+ * Multiplication is conducted on the Multiply_mat_vec function. The
+ * thread rank is used to decide which rows of the matrix it will be calculated
+ * by each thread.
  *
- * Output:
- *     y: the product vector
+ * Although pthreads can be used to parallelize this for loop, a preferable
+ * solution for this type of problem (parallelization of a for loop) would be
+ * using OpenMP as the code will be much simpler, cleaner and portable.
  *
+ * The file is run as follows:
  *
- *     pth_mat_vect <thread_count>
+ *    pth_mat_vect <thread_count>
  *
+ * where <thread_count> indicates the number of threads used to parallelize the
+ * computation.
  *
  * Code from Introduction to Parallel Programming by Peter Pacheco.
  */

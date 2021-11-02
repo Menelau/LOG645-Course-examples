@@ -11,9 +11,8 @@ sem_t semaphore;
 void* Semaphore_Function(void* args) {
     long rank = (long) args;
     sem_wait(&semaphore);
-    sleep(5);
-
     printf("Hello from thread %ld\n", rank);
+    sleep(10);   // simulating intensive calculation...
     sem_post(&semaphore);
     return NULL;
 }

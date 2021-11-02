@@ -39,8 +39,8 @@ int main(int argc, char* argv[]) {
     thread_handles = malloc(sizeof(thread_handles)*thread_count);
 
     // initialize semaphores and threads
-    sem_init(&semEmpty, 0, 10);
-    sem_init(&semFull, 0, 0);
+    sem_init(&empty, 0, 10);
+    sem_init(&full, 0, 0);
     pthread_mutex_init(&lock_prod_cons, NULL);
 
 
@@ -59,8 +59,8 @@ int main(int argc, char* argv[]) {
     }
 
     // destroy all synchronization mechanisms
-    sem_destroy(&semEmpty);
-    sem_destroy(&semFull);
+    sem_destroy(&empty);
+    sem_destroy(&full);
     pthread_mutex_destroy(&lock_prod_cons);
     free(thread_handles);
     return 0;

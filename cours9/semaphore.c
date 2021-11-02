@@ -15,6 +15,7 @@ void* Semaphore_Function(void* args) {
 
     printf("Hello from thread %ld\n", rank);
     sem_post(&semaphore);
+    return Null;
 }
 
 int main(int argc, char *argv[]) {

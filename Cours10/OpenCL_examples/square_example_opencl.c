@@ -226,7 +226,7 @@ int main(int argc, char** argv)
 
     // Validate our results
     correct = 0;
-    for(i = 0; i < count; i++){
+    for(int i = 0; i < count; i++){
         if(results[i] == data[i] * data[i])
             correct++;
     }

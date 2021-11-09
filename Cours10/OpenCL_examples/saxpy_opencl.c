@@ -5,10 +5,11 @@
 #else
 #include <CL/cl.h>
 #endif
-#define VECTOR_SIZE 1024
+#define VECTOR_SIZE 4096
 
-//OpenCL kernel which is run for every work item created.
-const char *saxpy_kernel =
+
+//OpenCL kernel as a string
+const char *saxpyKernel =
 "__kernel                                   \n"
 "void saxpy_kernel(float alpha,     \n"
 "                  __global float *A,       \n"
@@ -20,97 +21,111 @@ const char *saxpy_kernel =
 "    C[index] = alpha* A[index] + B[index]; \n"
 "}                                          \n";
 
+
 int main(void) {
-  int i;
+
   // Allocate space for vectors A, B and C
   float alpha = 2.0;
-  float *A = (float*)malloc(sizeof(float)*VECTOR_SIZE);
-  float *B = (float*)malloc(sizeof(float)*VECTOR_SIZE);
-  float *C = (float*)malloc(sizeof(float)*VECTOR_SIZE);
-  for(i = 0; i < VECTOR_SIZE; i++)
-  {
-    A[i] = i;
-    B[i] = VECTOR_SIZE - i;
-    C[i] = 0;
+  float *h_A = (float*) malloc(sizeof(float) * VECTOR_SIZE);
+  float *h_B = (float*) malloc(sizeof(float) * VECTOR_SIZE);
+  float *h_C = (float*) malloc(sizeof(float) * VECTOR_SIZE);
+
+  for(int i = 0; i < VECTOR_SIZE; i++){
+    h_A[i] = i;
+    h_B[i] = VECTOR_SIZE - i;
   }
 
-  // Get platform and device information
+  // 0) Create OpenCL Structures
   cl_platform_id * platforms = NULL;
-  cl_uint     num_platforms;
-  //Set up the Platform
+  cl_device_id *device_list = NULL;
+
+  cl_uint num_platforms;
+  cl_context context;
+  cl_command_queue command_queue;
+  cl_program saxpy_program;
+  cl_kernel saxpy_kernel;
+
+  // 1) Get platform and device information
   cl_int clStatus = clGetPlatformIDs(0, NULL, &num_platforms);
-  platforms = (cl_platform_id *)
-  malloc(sizeof(cl_platform_id)*num_platforms);
+  platforms = (cl_platform_id *) malloc(sizeof(cl_platform_id)*num_platforms);
   clStatus = clGetPlatformIDs(num_platforms, platforms, NULL);
 
-  //Get the devices list and choose the device you want to run on
-  cl_device_id     *device_list = NULL;
-  cl_uint           num_devices;
-
-  clStatus = clGetDeviceIDs( platforms[0], CL_DEVICE_TYPE_GPU, 0,NULL, &num_devices);
-  device_list = (cl_device_id *) 
-  malloc(sizeof(cl_device_id)*num_devices);
+  // 2) Get the devices list and choose the device you want to run on
+  cl_uint num_devices;
+  clStatus = clGetDeviceIDs(platforms[0], CL_DEVICE_TYPE_GPU, 0,NULL, &num_devices);
+  device_list = (cl_device_id *) malloc(sizeof(cl_device_id)*num_devices);
   clStatus = clGetDeviceIDs( platforms[0],CL_DEVICE_TYPE_GPU, num_devices, device_list, NULL);
 
-  // Create one OpenCL context for each device in the platform
-  cl_context context;
-  context = clCreateContext( NULL, num_devices, device_list, NULL, NULL, &clStatus);
+  // 3) Create one OpenCL context for each device in the platform
+  context = clCreateContext(NULL, num_devices, device_list, NULL, NULL, &clStatus);
 
-  // Create a command queue
-  cl_command_queue command_queue = clCreateCommandQueue(context, device_list[0], 0, &clStatus);
+  // 4) Create a command queue
+  command_queue = clCreateCommandQueue(context, device_list[0], 0, &clStatus);
 
-  // Create memory buffers on the device for each vector
-  cl_mem A_clmem = clCreateBuffer(context, CL_MEM_READ_ONLY, VECTOR_SIZE * sizeof(float), NULL, &clStatus);
-  cl_mem B_clmem = clCreateBuffer(context, CL_MEM_READ_ONLY, VECTOR_SIZE * sizeof(float), NULL, &clStatus);
-  cl_mem C_clmem = clCreateBuffer(context, CL_MEM_WRITE_ONLY, VECTOR_SIZE * sizeof(float), NULL, &clStatus);
+  // 5) Allocated memory on the device (for each array)
+  cl_mem d_A = clCreateBuffer(context, CL_MEM_READ_ONLY,
+            VECTOR_SIZE * sizeof(float), NULL, &clStatus);
+  cl_mem d_B = clCreateBuffer(context, CL_MEM_READ_ONLY,
+            VECTOR_SIZE * sizeof(float), NULL, &clStatus);
+  cl_mem d_C = clCreateBuffer(context, CL_MEM_WRITE_ONLY,
+            VECTOR_SIZE * sizeof(float), NULL, &clStatus);
 
-  // Copy the Buffer A and B to the device
-  clStatus = clEnqueueWriteBuffer(command_queue, A_clmem, CL_TRUE, 0, VECTOR_SIZE * sizeof(float), A, 0, NULL, NULL);
-  clStatus = clEnqueueWriteBuffer(command_queue, B_clmem, CL_TRUE, 0, VECTOR_SIZE * sizeof(float), B, 0, NULL, NULL);
+  // 6) Copy data from host to device
+  clStatus = clEnqueueWriteBuffer(command_queue, d_A, CL_TRUE, 0,
+             VECTOR_SIZE * sizeof(float), h_A, 0, NULL, NULL);
+  clStatus = clEnqueueWriteBuffer(command_queue, d_B, CL_TRUE, 0,
+             VECTOR_SIZE * sizeof(float), h_B, 0, NULL, NULL);
 
-  // Create a program from the kernel source
-  cl_program program = clCreateProgramWithSource(context, 1,(const char **)&saxpy_kernel, NULL, &clStatus);
+  // 7) Create a program from the kernel source
+  saxpy_program = clCreateProgramWithSource(context, 1,
+            (const char **)&saxpyKernel, NULL, &clStatus);
 
-  // Build the program
-  clStatus = clBuildProgram(program, 1, device_list, NULL, NULL, NULL);
+  // 8) Build the program
+  clStatus = clBuildProgram(saxpy_program, 1, device_list, NULL, NULL, NULL);
 
-  // Create the OpenCL kernel
-  cl_kernel kernel = clCreateKernel(program, "saxpy_kernel", &clStatus);
+  // // 9) Create the OpenCL kernel
+  saxpy_kernel = clCreateKernel(saxpy_program, "saxpyKernel", &clStatus);
 
-  // Set the arguments of the kernel
-  clStatus = clSetKernelArg(kernel, 0, sizeof(float), (void *)&alpha);
-  clStatus = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&A_clmem);
-  clStatus = clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *)&B_clmem);
-  clStatus = clSetKernelArg(kernel, 3, sizeof(cl_mem), (void *)&C_clmem);
+  // 9.1) Set the arguments of the kernel
+  clStatus = clSetKernelArg(saxpy_kernel, 0, sizeof(float), (void *)&alpha);
+  clStatus = clSetKernelArg(saxpy_kernel, 1, sizeof(cl_mem), (void *)&d_A);
+  clStatus = clSetKernelArg(saxpy_kernel, 2, sizeof(cl_mem), (void *)&d_B);
+  clStatus = clSetKernelArg(saxpy_kernel, 3, sizeof(cl_mem), (void *)&d_C);
 
-  // Execute the OpenCL kernel on the list
+  // 10) Execute the OpenCL kernel on the list
   size_t global_size = VECTOR_SIZE; // Process the entire lists
   size_t local_size = 64;           // Process one item at a time
-  clStatus = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL, &global_size, &local_size, 0, NULL, NULL);
+  clStatus = clEnqueueNDRangeKernel(command_queue, saxpy_kernel, 1, NULL,
+             &global_size, &local_size, 0, NULL, NULL);
 
-  // Read the cl memory C_clmem on device to the host variable C
-  clStatus = clEnqueueReadBuffer(command_queue, C_clmem, CL_TRUE, 0, VECTOR_SIZE * sizeof(float), C, 0, NULL, NULL);
+  // 11) Transfer data Device to Host
+  clStatus = clEnqueueReadBuffer(command_queue, d_C, CL_TRUE, 0,
+             VECTOR_SIZE * sizeof(float), h_C, 0, NULL, NULL);
 
-  // Clean up and wait for all the comands to complete.
+  // Wait for all the comands to complete.
   clStatus = clFlush(command_queue);
   clStatus = clFinish(command_queue);
 
-  // Display the result to the screen
-  for(i = 0; i < VECTOR_SIZE; i++)
-    printf("%f * %f + %f = %f\n", alpha, A[i], B[i], C[i]);
+  // 12) Release allocated memory on devices
+  clStatus = clReleaseMemObject(d_A);
+  clStatus = clReleaseMemObject(d_B);
+  clStatus = clReleaseMemObject(d_C);
 
-  // Finally release all OpenCL allocated objects and host buffers.
-  clStatus = clReleaseKernel(kernel);
-  clStatus = clReleaseProgram(program);
-  clStatus = clReleaseMemObject(A_clmem);
-  clStatus = clReleaseMemObject(B_clmem);
-  clStatus = clReleaseMemObject(C_clmem);
+  // Display the result to the screen
+  for(int i = 0; i < VECTOR_SIZE; i++)
+    printf("%f * %f + %f = %f\n", alpha, h_A[i], h_B[i], h_C[i]);
+
+  // 13)Finally release all OpenCL allocated objects.
+  clStatus = clReleaseKernel(saxpy_kernel);
+  clStatus = clReleaseProgram(saxpy_program);
   clStatus = clReleaseCommandQueue(command_queue);
   clStatus = clReleaseContext(context);
-  free(A);
-  free(B);
-  free(C);
+
+  free(h_A);
+  free(h_B);
+  free(h_C);
   free(platforms);
   free(device_list);
+
   return 0;
 }

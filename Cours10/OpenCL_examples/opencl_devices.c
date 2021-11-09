@@ -2,7 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <OpenCL/opencl.h>
+#ifdef __APPLE__
+#include <OpenCL/cl.h>
+#else
+#include <CL/cl.h>
+#endif
 
 int main() {
 

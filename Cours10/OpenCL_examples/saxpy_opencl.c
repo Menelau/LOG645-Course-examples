@@ -5,7 +5,7 @@
 #else
 #include <CL/cl.h>
 #endif
-#define VECTOR_SIZE 4096
+#define VECTOR_SIZE 1024
 
 
 //OpenCL kernel as a string
@@ -16,6 +16,7 @@ const char *saxpyKernel =
 "                  __global float *B,       \n"
 "                  __global float *C)       \n"
 "{                                          \n"
+" printf(\"hey hey hey\");                  \n"
 "    //Get the index of the work-item       \n"
 "    int index = get_global_id(0);          \n"
 "    C[index] = alpha* A[index] + B[index]; \n"
@@ -26,9 +27,10 @@ int main(void) {
 
   // Allocate space for vectors A, B and C
   float alpha = 2.0;
-  float *h_A = (float*) malloc(sizeof(float) * VECTOR_SIZE);
-  float *h_B = (float*) malloc(sizeof(float) * VECTOR_SIZE);
-  float *h_C = (float*) malloc(sizeof(float) * VECTOR_SIZE);
+  size_t bytes = VECTOR_SIZE * sizeof(float);
+  float *h_A = (float*) malloc(bytes);
+  float *h_B = (float*) malloc(bytes);
+  float *h_C = (float*) malloc(bytes);
 
   for(int i = 0; i < VECTOR_SIZE; i++){
     h_A[i] = i;
@@ -64,17 +66,17 @@ int main(void) {
 
   // 5) Allocated memory on the device (for each array)
   cl_mem d_A = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            VECTOR_SIZE * sizeof(float), NULL, &clStatus);
+            bytes, NULL, &clStatus);
   cl_mem d_B = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            VECTOR_SIZE * sizeof(float), NULL, &clStatus);
+            bytes, NULL, &clStatus);
   cl_mem d_C = clCreateBuffer(context, CL_MEM_WRITE_ONLY,
-            VECTOR_SIZE * sizeof(float), NULL, &clStatus);
+            bytes, NULL, &clStatus);
 
   // 6) Copy data from host to device
   clStatus = clEnqueueWriteBuffer(command_queue, d_A, CL_TRUE, 0,
-             VECTOR_SIZE * sizeof(float), h_A, 0, NULL, NULL);
+             bytes, h_A, 0, NULL, NULL);
   clStatus = clEnqueueWriteBuffer(command_queue, d_B, CL_TRUE, 0,
-             VECTOR_SIZE * sizeof(float), h_B, 0, NULL, NULL);
+             bytes, h_B, 0, NULL, NULL);
 
   // 7) Create a program from the kernel source
   saxpy_program = clCreateProgramWithSource(context, 1,
@@ -84,7 +86,7 @@ int main(void) {
   clStatus = clBuildProgram(saxpy_program, 1, device_list, NULL, NULL, NULL);
 
   // // 9) Create the OpenCL kernel
-  saxpy_kernel = clCreateKernel(saxpy_program, "saxpyKernel", &clStatus);
+  saxpy_kernel = clCreateKernel(saxpy_program, "saxpy_kernel", &clStatus);
 
   // 9.1) Set the arguments of the kernel
   clStatus = clSetKernelArg(saxpy_kernel, 0, sizeof(float), (void *)&alpha);
@@ -100,10 +102,9 @@ int main(void) {
 
   // 11) Transfer data Device to Host
   clStatus = clEnqueueReadBuffer(command_queue, d_C, CL_TRUE, 0,
-             VECTOR_SIZE * sizeof(float), h_C, 0, NULL, NULL);
+             bytes, h_C, 0, NULL, NULL);
 
   // Wait for all the comands to complete.
-  clStatus = clFlush(command_queue);
   clStatus = clFinish(command_queue);
 
   // 12) Release allocated memory on devices
@@ -112,9 +113,9 @@ int main(void) {
   clStatus = clReleaseMemObject(d_C);
 
   // Display the result to the screen
-  for(int i = 0; i < VECTOR_SIZE; i++)
+for(int i = 0; i < VECTOR_SIZE; i++){
     printf("%f * %f + %f = %f\n", alpha, h_A[i], h_B[i], h_C[i]);
-
+}
   // 13)Finally release all OpenCL allocated objects.
   clStatus = clReleaseKernel(saxpy_kernel);
   clStatus = clReleaseProgram(saxpy_program);

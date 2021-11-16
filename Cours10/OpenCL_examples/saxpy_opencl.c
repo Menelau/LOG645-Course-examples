@@ -16,7 +16,6 @@ const char *saxpyKernel =
 "                  __global float *B,       \n"
 "                  __global float *C)       \n"
 "{                                          \n"
-" printf(\"hey hey hey\");                  \n"
 "    //Get the index of the work-item       \n"
 "    int index = get_global_id(0);          \n"
 "    C[index] = alpha* A[index] + B[index]; \n"
@@ -113,9 +112,9 @@ int main(void) {
   clStatus = clReleaseMemObject(d_C);
 
   // Display the result to the screen
-for(int i = 0; i < VECTOR_SIZE; i++){
-    printf("%f * %f + %f = %f\n", alpha, h_A[i], h_B[i], h_C[i]);
-}
+  for(int i = 0; i < VECTOR_SIZE; i++){
+      printf("%f * %f + %f = %f\n", alpha, h_A[i], h_B[i], h_C[i]);
+  }
   // 13)Finally release all OpenCL allocated objects.
   clStatus = clReleaseKernel(saxpy_kernel);
   clStatus = clReleaseProgram(saxpy_program);

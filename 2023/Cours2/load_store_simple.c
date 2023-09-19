@@ -33,7 +33,7 @@ int main( void ){
     vec = _mm_loadu_si128( (__m128i*) &in[4] );
     _mm_storeu_si128( (__m128i*) &out[4], vec );
 
-    //both parts of the array were copied now. We
+    //both parts of the array were copied now.
     printf( "Out: " );
     for(int i = 0 ; i < 8 ; i++ ){
         printf( "%i  ", out[i] );

@@ -37,7 +37,7 @@ int main() {
     // Defining a square matrix of size N X N
     clock_t start, end;
     double cpu_time_used;
-    int N = 1024;
+    int N = 4096;
     size_t matrix_size = N * N * sizeof(float);
 
     // allocating matrices.

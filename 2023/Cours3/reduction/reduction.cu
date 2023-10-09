@@ -1,5 +1,5 @@
-/* SUM reduction kernel example inspired by NVIDIA by Mark harris tutorial:
-* https://developer.download.nvidia.com/assets/cuda/files/reduction.pdf  
+﻿/* SUM reduction kernel example inspired by NVIDIA by Mark harris tutorial:
+* https://developer.download.nvidia.com/assets/cuda/files/reduction.pdf
 *
 */
 #include "cuda_runtime.h""
@@ -35,7 +35,7 @@ __global__ void sumReductionWarpDisagreement(unsigned int* v, unsigned int* v_r)
 
 
 __global__ void sumReductionWarpAgreement(unsigned int* v, unsigned int* v_r) {
-	
+
 	// Use shared memory to share data in a block
 	__shared__ unsigned int partial_sum[SIZE];
 	unsigned int tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -55,9 +55,9 @@ __global__ void sumReductionWarpAgreement(unsigned int* v, unsigned int* v_r) {
 
 	// Let the thread 0 for this block write it's result to main memory
 	// Result is inexed by this block
-	if (threadIdx.x == 0) 
+	if (threadIdx.x == 0)
 		v_r[blockIdx.x] = partial_sum[0];
-	
+
 }
 
 
@@ -75,9 +75,9 @@ int main(void) {
 	for (int i = 0; i < N; i++) {
 		vector[i] = 1;
 	}
-	
+
 	int BLOCK_SIZE = SIZE;
-	unsigned int GRID_SIZE = (N + BLOCK_SIZE -1) / BLOCK_SIZE;
+	unsigned int GRID_SIZE = (N + BLOCK_SIZE - 1) / BLOCK_SIZE;
 	// Call kernel
 	sumReductionWarpAgreement <<<GRID_SIZE, BLOCK_SIZE >>> (vector, vector_reduced);
 	sumReductionWarpAgreement <<<1, BLOCK_SIZE >>> (vector_reduced, vector_reduced);

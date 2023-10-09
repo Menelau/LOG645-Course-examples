@@ -19,7 +19,7 @@ double dot_product_fma(float *A, float *B, int N){
     prod = _mm256_setzero_ps();
     //as we are using float we can have 8 elements in a 256 register AVX.
     for(int i = 0 ; i < N ; i += 8){
-        //pd since the data type is double.
+        //ps since the data type is float.
         a = _mm256_loadu_ps( &A[i] );
         b = _mm256_loadu_ps( &B[i] );
         //note that this line does the sum to the prod variable. No need to +=

@@ -50,3 +50,71 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Visual Studio extensions
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# User-specific files (Mono auto generated)
+mono_crash.*
+
+# Mono auto generated files
+.mono/
+
+# Build Results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# C++ auto generated files
+*.vcxproj.*
+*.vcxproj.filters
+
+# Visual Studio Code directories
+.vscode/
+
+# Visual Studio Code files
+.code-workspace
+.vscode/
+
+# Solution file
+*.sln
+
+# Visual Studio database files
+*.dbmdl
+*.opendb
+*.VC.db
+
+# Visual Studio profiler
+*.vsp
+*.vspx
+*.sap
+
+# IIS Express
+.iisexpress/
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows shortcuts
+*.lnk

@@ -6,10 +6,14 @@
 
 int main(){
     pid_t pid, cpid;
-    char* command = "/usr/bin/touch";
-    char* args[3] = { command, "/tmp/toto", NULL };
+
+    // have the calendar as a progam to be executed.
+    char* command = "/usr/bin/cal";
+    char* args[3] = { "/usr/bin/cal", NULL };
+
     pid = fork();
     switch( pid ){
+    //processus enfant
     case 0:
         printf( "Je suis le processus enfant %d\n", getpid() );
         execv( command, args );
@@ -18,9 +22,11 @@ int main(){
     case -1:
         printf( "Erreur lors de la creation de processus -- %d\n", getpid() );
         break;
+    //processus parent
     default:
         printf( "Je suis le processus parent %d et je viens de lancer mon enfant %d\n", getpid(), pid );
         cpid = wait( NULL );
         break;
     }        
     return EXIT_SUCCESS;
+}

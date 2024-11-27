@@ -1,8 +1,10 @@
-// Code modified  www.mpitutorial.com by Wes Kendall
+// Code inspired by www.mpitutorial.com by Wes Kendall
 //
 //
 // Program that computes the average of an array of elements in parallel using
 // MPI_Reduce.
+// Compilation : mpicc -o reduce_avg reducce_avg.c
+// run : mpirun -np N_process ./reduce_avg N_elements
 //
 #include <stdio.h>
 #include <stdlib.h>

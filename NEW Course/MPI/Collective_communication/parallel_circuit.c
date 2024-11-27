@@ -9,6 +9,9 @@
  *
  *  Code adapted from Parallel programming in C with MPI and OpenMP
  *   by Michael J. Quinn (2003)
+ *
+ * Compile : mpicc -o parallel_circuit parallel_circuit.c
+ * Run : mpirun -np N_process ./parallel_circuit
  */
 
 #include <mpi.h>
